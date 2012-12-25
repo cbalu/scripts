@@ -10,63 +10,63 @@
 symbol="/-\|"
 symindex=0
 spin() {
-        ((symindex==${#symbol})) && symindex=0
-        echo -n "${symbol:symindex:1}${symbol:symindex:1}${symbol:symindex:1}${symbol:symindex:1} ]" 2>/dev/null
-        echo -ne "\b\b\b\b\b\b" 2>/dev/null
-        symindex=$symindex+1
+	((symindex==${#symbol})) && symindex=0
+	echo -n "${symbol:symindex:1}${symbol:symindex:1}${symbol:symindex:1}${symbol:symindex:1} ]" 2>/dev/null
+	echo -ne "\b\b\b\b\b\b" 2>/dev/null
+	symindex=$symindex+1
 }
 
 # Function to be invoked after the spin motion ends
 endspin() {
-        echo -n "DONE ]" 2>/dev/null
-        echo "" 2>/dev/null
+	echo -n "DONE ]" 2>/dev/null
+	echo "" 2>/dev/null
 }
 
 # General cleanup function used to remove unwanted stuff before exit
 cleanup_func() {
-        rm -f .balac_script_pid > /dev/null 2>&1
+	rm -f .balac_script_pid > /dev/null 2>&1
 	echo ""
-        exit
+	exit
 }
 
 # Function which installs interruption handle
 install_trap_handle() {
-        func="$1" ; shift
-        for signal ; do
-                trap "$func $signal" "$signal"
-        done
+	func="$1" ; shift
+	for signal ; do
+		trap "$func $signal" "$signal"
+	done
 }
 
 # Actual interruption function which was registered
 trap_func() {
-        kill -15 `cat .build_script_pid` > /dev/null 2>&1
-        echo -ne "\rCaught $1 signal, Please wait cleaning up unfinished jobs\n\n" 2>/dev/null
-        sleep 1
-        rm -f cscope.* > /dev/null 2>&1
-        rm -f tags > /dev/null 2>&1
-        cleanup_func
+	kill -15 `cat .build_script_pid` > /dev/null 2>&1
+	echo -ne "\rCaught $1 signal, Please wait cleaning up unfinished jobs\n\n" 2>/dev/null
+	sleep 1
+	rm -f cscope.* > /dev/null 2>&1
+	rm -f tags > /dev/null 2>&1
+	cleanup_func
 }
 
 # Function which gets forked
 fork_func() {
-        cscope -b -q -R > /dev/null 2>&1
-        ctags -R * > /dev/null 2>&1
-        rm -f .build_script_pid > /dev/null 2>&1
+	cscope -b -q -R > /dev/null 2>&1
+	ctags -R * > /dev/null 2>&1
+	rm -f .build_script_pid > /dev/null 2>&1
 }
 
 # Function which checks whether required binary are installed
 check_req() {
-	which which > /dev/null
+	which which > /dev/null 2>&1
 	if [ $? -eq 1 ]; then
 		echo "Expected binary \"which\" not available"
 		cleanup_func
 	fi
-	which cscope > /dev/null
+	which cscope > /dev/null 2>&1
 	if [ $? -eq 1 ]; then
 		echo "Expected binary \"cscope\" not available"
 		cleanup_func
 	fi
-	which ctags > /dev/null
+	which ctags > /dev/null 2>&1
 	if [ $? -eq 1 ]; then
 		echo "Expected binary \"ctags\" not available"
 		cleanup_func
@@ -88,14 +88,14 @@ fork_func &
 echo $! > .build_script_pid
 # Check for the presence of index files
 if [ -f cscope.in.out ] || [ -f cscope.po.out ] || [ -f tags ]; then
-        echo -n "Updating index files............[ "
+	echo -n "Updating index files............[ "
 else
-        echo -n "Building index files............[ "
+	echo -n "Building index files............[ "
 fi
 # Show the spin motion till the index files are generated
 while [ -s .build_script_pid ]
 do
-    spin
+	spin
 done
 endspin
 # Do the cleanup work
