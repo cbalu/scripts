@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # Script used to generate Cscope and Ctags index files under current directory
-# Also added interruption handle capabilities. Tested under Fedora 13
+# Also added interruption handle capabilities. Tested under Fedora 13 &
+# Ubuntu 12.04 LTS edition
 #
 # Author: BalaC
 #
@@ -26,7 +27,7 @@ endspin() {
 cleanup_func() {
 	rm -f .balac_script_pid > /dev/null 2>&1
 	echo ""
-	exit
+	exit $1
 }
 
 # Function which installs interruption handle
@@ -44,7 +45,7 @@ trap_func() {
 	sleep 1
 	rm -f cscope.* > /dev/null 2>&1
 	rm -f tags > /dev/null 2>&1
-	cleanup_func
+	cleanup_func 1
 }
 
 # Function which gets forked
@@ -55,21 +56,24 @@ fork_func() {
 }
 
 # Function which checks whether required binary are installed
+# this method uses 'which' executable return value to judge
+# required binary availability, if it returns 1 then respective
+# binary is not installed on the machine
 check_req() {
 	which which > /dev/null 2>&1
 	if [ $? -eq 1 ]; then
 		echo "Expected binary \"which\" not available"
-		cleanup_func
+		cleanup_func 2
 	fi
 	which cscope > /dev/null 2>&1
 	if [ $? -eq 1 ]; then
 		echo "Expected binary \"cscope\" not available"
-		cleanup_func
+		cleanup_func 2
 	fi
 	which ctags > /dev/null 2>&1
 	if [ $? -eq 1 ]; then
 		echo "Expected binary \"ctags\" not available"
-		cleanup_func
+		cleanup_func 2
 	fi
 }
 
@@ -77,9 +81,9 @@ check_req() {
 # Script execution starts here
 #
 
-echo ""
 # Check for required binary
 check_req
+echo ""
 # Install a interruption handler to catch Ctrl+C combination
 install_trap_handle trap_func INT TERM
 # Fork the cscope and ctags index generation
@@ -99,4 +103,4 @@ do
 done
 endspin
 # Do the cleanup work
-cleanup_func
+cleanup_func 0
