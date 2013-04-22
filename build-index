@@ -56,23 +56,13 @@ fork_func() {
 }
 
 # Function which checks whether required binary are installed
-# this method uses 'which' executable return value to judge
-# required binary availability, if it returns 1 then respective
-# binary is not installed on the machine
 check_req() {
-	which which > /dev/null 2>&1
-	if [ $? -eq 1 ]; then
-		echo "Expected binary \"which\" not available"
+	if ! cmd_loc="$(type -p "cscope")" || [ -z "$cmd_loc" ]; then
+		echo "Expected binary \"cscope\" not available, script can't be executed"
 		cleanup_func 2
 	fi
-	which cscope > /dev/null 2>&1
-	if [ $? -eq 1 ]; then
-		echo "Expected binary \"cscope\" not available"
-		cleanup_func 2
-	fi
-	which ctags > /dev/null 2>&1
-	if [ $? -eq 1 ]; then
-		echo "Expected binary \"ctags\" not available"
+	if ! cmd_loc="$(type -p "ctags")" || [ -z "$cmd_loc" ]; then
+		echo "Expected binary \"ctags\" not available, script can't be executed"
 		cleanup_func 2
 	fi
 }
